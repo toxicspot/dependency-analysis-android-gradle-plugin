@@ -1,5 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
 import org.gradle.api.publish.maven.MavenPom
 
 plugins {
@@ -7,6 +8,7 @@ plugins {
   `maven-publish`
   id("com.gradle.plugin-publish")
   signing
+  id("com.github.johnrengelman.shadow")
 }
 
 val VERSION: String by project
@@ -59,6 +61,8 @@ publishing {
 
     create<MavenPublication>("plugin") {
       from(components["java"])
+//      project.shadow.component(this)
+      artifact(project.tasks.shadowJar.get())
       configurePom(pom)
       signing.sign(this)
 
@@ -136,4 +140,26 @@ tasks.register("publishToMavenCentral") {
       logger.quiet("After publishing to Sonatype, visit https://oss.sonatype.org to close and release from staging")
     }
   }
+}
+
+//val relocateShadowJar = tasks.register<ConfigureShadowRelocation>("relocateShadowJar") {
+//  target = tasks.shadowJar.get()
+//}
+
+configurations["api"].dependencies.remove(dependencies.gradleApi())
+configurations["api"].dependencies.remove(dependencies.localGroovy())
+
+tasks.shadowJar {
+//  dependsOn(relocateShadowJar)
+  archiveClassifier.set("")
+  dependencies {
+    exclude {
+      !dependency("com.squareup.moshi:moshi").isSatisfiedBy(it) &&
+        !dependency("com.squareup.moshi:moshi-kotlin").isSatisfiedBy(it)
+    }
+  }
+}
+
+tasks.jar {
+  archiveClassifier.set("base")
 }

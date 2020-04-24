@@ -76,6 +76,9 @@ val antlrVersion by extra("4.8")
 val internalAntlrVersion by extra("$antlrVersion.0")
 
 dependencies {
+//  shadow(localGroovy())
+//  shadow(gradleApi())
+
   implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
 
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
